@@ -32,7 +32,7 @@ tb_group as (
 select seller_id,
         payment_type,
         count(DISTINCT order_id) as qntPedidoMeioPagamento,
-        sum(payment_value) as payment_type_value
+        sum(payment_value) as vlPedidoMeioPagamento
 
 from tb_join
 
@@ -41,4 +41,28 @@ order by 1, 2
 
 )
 
-select DISTINCT payment_type from tb_group
+select seller_id,
+
+sum(case when payment_type = 'credit_card' then qntPedidoMeioPagamento else 0 end) as qtdecredit_card_pedido,
+sum(case when payment_type = 'boleto' then qntPedidoMeioPagamento else 0 end) as qtdeboleto_pedido,
+sum(case when payment_type = 'debit_card' then qntPedidoMeioPagamento else 0 end) as qtdedebit_card_pedido,
+sum(case when payment_type = 'voucher' then qntPedidoMeioPagamento else 0 end) as qtdevoucher_pedido,
+
+sum(case when payment_type = 'credit_card' then vlPedidoMeioPagamento else 0 end) as valor_credit_card_pedido,
+sum(case when payment_type = 'boleto' then vlPedidoMeioPagamento else 0 end) as valor_boleto_pedido,
+sum(case when payment_type = 'debit_card' then vlPedidoMeioPagamento else 0 end) as valor_debit_card_pedido,
+sum(case when payment_type = 'voucher' then vlPedidoMeioPagamento else 0 end) as valor_oucher_pedido,
+
+sum(case when payment_type = 'credit_card' then qntPedidoMeioPagamento else 0 end) / sum(qntPedidoMeioPagamento) as pct_qtd_credit_card_pedido,
+sum(case when payment_type = 'boleto' then qntPedidoMeioPagamento else 0 end) / sum(qntPedidoMeioPagamento) as pct_qtd_boleto_pedido,
+sum(case when payment_type = 'debit_card' then qntPedidoMeioPagamento else 0 end) / sum(qntPedidoMeioPagamento) as pct_qtd_debit_card_pedido,
+sum(case when payment_type = 'voucher' then qntPedidoMeioPagamento else 0 end) / sum(qntPedidoMeioPagamento) as pct_qtd_voucher_pedido,
+
+sum(case when payment_type = 'credit_card' then vlPedidoMeioPagamento else 0 end) / sum(vlPedidoMeioPagamento) as pct_valor_credit_card_pedido,
+sum(case when payment_type = 'boleto' then vlPedidoMeioPagamento else 0 end) / sum(vlPedidoMeioPagamento) as pct_valor_boleto_pedido,
+sum(case when payment_type = 'debit_card' then vlPedidoMeioPagamento else 0 end) / sum(vlPedidoMeioPagamento) as pct_valor_debit_card_pedido,
+sum(case when payment_type = 'voucher' then vlPedidoMeioPagamento else 0 end) / sum(vlPedidoMeioPagamento) as pct_valor_oucher_pedido
+
+from tb_group
+
+group by 1

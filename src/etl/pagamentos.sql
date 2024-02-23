@@ -10,6 +10,7 @@ group by 1
 order by 1; */
  
  -- The view bellow select only the orders we want to evaluate, excluding Null values
+
 with tb_pedidos as (
 
     select DISTINCT
@@ -100,12 +101,13 @@ group by seller_id
 )
 
 select 
-    '2018-01-01' as dtReference
+    '2018-01-01' as dtReference,
     t1.*,
     t2.avgQtdeParcelas,
     t2.maxQtdeParcelas,
     t2.minQtdeParcelas
+
 from tb_summary as t1
 
 left join tb_cartao as t2
-on t1.seller_id = t2.seller_id
+on t1.seller_id = t2.seller_id 

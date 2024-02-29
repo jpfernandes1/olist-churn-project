@@ -27,7 +27,9 @@ group by t1.order_id,
         t1.order_estimated_delivery_date
 )
 
-select seller_id,
+select 
+        '2018-01-01' as dtReference,
+        seller_id,
        count(DISTINCT case when date(coalesce(order_delivered_customer_date, '2018-01-01')) 
        > date(order_estimated_delivery_date) then order_id END) 
        / count(DISTINCT case WHEN order_status = 'delivered' then order_id end) as pctPedidoAtraso,
@@ -40,4 +42,4 @@ select seller_id,
        AVG(JULIANDAY(order_estimated_delivery_date) - JULIANDAY(COALESCE(order_delivered_customer_date, '2018-01-01'))) AS qtdDiasEntregaxPromessa
 from tb_pedido
 
-group by 1;
+group by 2;

@@ -7,8 +7,8 @@ from olist_orders_dataset as t1
 left join olist_order_items_dataset as t2
 on t1.order_id = t2.order_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
-and t1.order_purchase_timestamp > '2017-07-01'
+where t1.order_purchase_timestamp < '{date}'
+and t1.order_purchase_timestamp > date('{date}', '-6 months')
 and seller_id is not NULL
 
 ),
@@ -20,7 +20,7 @@ SELECT
     COUNT(DISTINCT order_id) AS qntPedidos,
     COUNT(DISTINCT DATE(order_purchase_timestamp)) AS qtdDias,
     COUNT(order_item_id) AS qntItens,
-    MAX(JULIANDAY('2018-01-01') - JULIANDAY(order_purchase_timestamp)) AS qtdRecencia,
+    MAX(JULIANDAY('{date}') - JULIANDAY(order_purchase_timestamp)) AS qtdRecencia,
     SUM(COALESCE(price, 0)) / COUNT(DISTINCT order_id) AS ticketMedio,
     AVG(COALESCE(price, 0)) AS avgValorProduto,
     MAX(COALESCE(price, 0)) AS maxValorProduto,
@@ -65,7 +65,7 @@ tb_life as (
 select 
         t2.seller_id,
         sum(price) as LTV,
-         MAX(JULIANDAY('2018-01-01') 
+         MAX(JULIANDAY('{date}') 
          - JULIANDAY(order_purchase_timestamp)) AS qtdeDiasBase
 
 from olist_orders_dataset as t1
@@ -73,7 +73,7 @@ from olist_orders_dataset as t1
 left join olist_order_items_dataset as t2
 on t1.order_id = t2.order_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
+where t1.order_purchase_timestamp < '{date}'
 and seller_id is not NULL
 
 group by t2.seller_id 
@@ -113,7 +113,8 @@ group by seller_id
 )
 
 select 
-       '2018-01-01' as dtReference,
+       '{date}' as dtReference,
+       date('now') as dtIngestion,
        t1.*,
        t2.minVlPedido,
        t2.maxVlPedido,

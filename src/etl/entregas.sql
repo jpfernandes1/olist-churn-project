@@ -1,4 +1,5 @@
 with tb_pedido as (
+
 select 
         t1.order_id,
         t2.seller_id,
@@ -14,8 +15,8 @@ from olist_orders_dataset as t1
 left join olist_order_items_dataset as t2
 on t1.order_id = t2.order_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
-and t1.order_purchase_timestamp >= '2017-01-01'
+where t1.order_purchase_timestamp < '{date}'
+and t1.order_purchase_timestamp >= DATE('{date}', '-6 months')
 and t2.seller_id is not NULL
 
 group by t1.order_id,
@@ -28,9 +29,10 @@ group by t1.order_id,
 )
 
 select 
-        '2018-01-01' as dtReference,
+        '{date}' as dtReference,
+        DATE('now') as dtIngestion,
         seller_id,
-       count(DISTINCT case when date(coalesce(order_delivered_customer_date, '2018-01-01')) 
+       count(DISTINCT case when date(coalesce(order_delivered_customer_date, '{date}')) 
        > date(order_estimated_delivery_date) then order_id END) 
        / count(DISTINCT case WHEN order_status = 'delivered' then order_id end) as pctPedidoAtraso,
        count(DISTINCT case when order_status = 'canceled' then order_id end) 
@@ -38,8 +40,8 @@ select
        avg(totalFrete) as avgFrete,
        max(totalFrete) as maxFrete,
        min(totalFrete) as minFrete,
-       AVG(JULIANDAY(COALESCE(order_delivered_customer_date, '2018-01-01')) - JULIANDAY(order_approved_at)) AS qtdDiasAprovadoxEntrega,
-       AVG(JULIANDAY(order_estimated_delivery_date) - JULIANDAY(COALESCE(order_delivered_customer_date, '2018-01-01'))) AS qtdDiasEntregaxPromessa
+       AVG(JULIANDAY(COALESCE(order_delivered_customer_date, '{date}')) - JULIANDAY(order_approved_at)) AS qtdDiasAprovadoxEntrega,
+       AVG(JULIANDAY(order_estimated_delivery_date) - JULIANDAY(COALESCE(order_delivered_customer_date, '{date}'))) AS qtdDiasEntregaxPromessa
 from tb_pedido
 
-group by 2;
+group by 1,2,3

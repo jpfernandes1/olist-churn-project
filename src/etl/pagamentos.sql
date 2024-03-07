@@ -22,8 +22,8 @@ with tb_pedidos as (
     left join olist_order_items_dataset as t2
     on t1.order_id = t2.order_id
 
-    where t1.order_purchase_timestamp < '2018-01-01'
-    and t1.order_purchase_timestamp >= '2017-07-01'
+    where t1.order_purchase_timestamp < '{date}'
+    and t1.order_purchase_timestamp >= date('{date}', '-6 months')
     and t2.seller_id is not null
 
 ),
@@ -101,7 +101,8 @@ group by seller_id
 )
 
 select 
-    '2018-01-01' as dtReference,
+    '{date}' as dtReference,
+    date('now') as dtIngestion,
     t1.*,
     t2.avgQtdeParcelas,
     t2.maxQtdeParcelas,

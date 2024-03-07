@@ -13,8 +13,8 @@ on t1.order_id = t2.order_id
 left join olist_products_dataset as t3
 on t2.product_id = t3.product_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
-and t1.order_purchase_timestamp > '2017-07-01'
+where t1.order_purchase_timestamp < '{date}'
+and t1.order_purchase_timestamp >= date('{date}', '-6 months')
 and seller_id is not NULL
 
 ),
@@ -50,7 +50,8 @@ group by 1
 
 )
 
-select '2018-01-01' as dtReference,
+select '{date}' as dtReference,
+        date('now') as dtIngestion,
         *
 from tb_summary
 
@@ -69,7 +70,7 @@ on t1.order_id = t2.order_id
 left join olist_products_dataset as t3
 on t2.product_id = t3.product_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
+where t1.order_purchase_timestamp < '{date}'
 and t1.order_purchase_timestamp > '2017-07-01'
 and t2.seller_id is not NULL
 

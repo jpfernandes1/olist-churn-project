@@ -14,8 +14,8 @@ on t1.order_id = t2.order_id
 left join olist_customers_dataset as t3
 on t1.customer_id  = t3.customer_id
 
-where order_purchase_timestamp < '2018-01-01'
-and order_purchase_timestamp >= '2017-07-01'
+where order_purchase_timestamp < '{date}'
+and order_purchase_timestamp >= DATE('{date}', '-6 months')
 and seller_id is not null
 
 ),
@@ -60,6 +60,7 @@ group by seller_id
 )
 
 select 
-    '2018-01-01' as dtReference,
+    '{date}' as dtReference,
+    date('now') as dtIngestion,
     *
 from tb_group

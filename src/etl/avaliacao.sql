@@ -13,8 +13,8 @@ on t1.order_id = t2.order_id
 left join olist_order_items_dataset as t3
 on t1.order_id = t3.order_id
 
-where t1.order_purchase_timestamp < '2018-01-01'
-and t1.order_purchase_timestamp >= '2017-01-01'
+where t1.order_purchase_timestamp < '{date}'
+and t1.order_purchase_timestamp >= DATE('{date}', '-6 months')
 and t3.seller_id is not null
 
 ),
@@ -37,6 +37,7 @@ order by 3 desc
 
 )
 
-select '2018-01-01' as dtReference,
+select '{date}' as dtReference,
+        date('now') as dtIngestion,
         *
 from tb_summary;

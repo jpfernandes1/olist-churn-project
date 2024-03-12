@@ -3,7 +3,23 @@ from tqdm import tqdm
 import sqlalchemy
 import os
 import pandas as pd
+import argparse
+
+def date_range(dt_start, dt_stop, period='daily'):
     
+    date_start = datetime.datetime.strptime(dt_start, '%Y-%m-%d')
+    date_stop = datetime.datetime.strptime(dt_stop, '%Y-%m-%d')
+    dates = []
+    while date_start <= date_stop:
+        dates.append(date_start.strftime("%Y-%m-%d"))
+        date_start += datetime.timedelta(days=1)
+
+    if period == 'daily':
+        return dates
+    
+    elif period == 'monthly':
+        return [i for i in dates if i.endswith("01")]
+
 class Ingestor:
 
     def __init__(self, path, table, key_field):
@@ -28,10 +44,10 @@ class Ingestor:
         with self.engine.connect() as connection:
             df = pd.read_sql_query(query, connection)
         return df
-
+    
     def insert_table(self, df):
         with self.engine.connect() as connection:
-            df.to_sql(self.table, connection, if_exists= 'replace', index=False)
+            df.to_sql(self.table, connection, if_exists= 'append', index=False)
         return True
 
     def delete_table_rows(self, value):
@@ -40,8 +56,18 @@ class Ingestor:
             connection.execute(sqlalchemy.text(sql))
             connection.commit()
         return True
+    
+    def update_table(self, raw_query, value):
+        if self.table_exists():
+            self.delete_table_rows(value)
 
-if __name__ == "__main__":
+        print("Executando ETL...")
+        df = self.execute_etl(raw_query.format(date=value))
+        
+        print("Salvando dados na tabela...")
+        self.insert_table(df)
+
+def main():
 
     ETL_DIR = os.path.dirname(os.path.abspath(__file__))
     LOCAL_DEV_DIR = os.path.dirname(ETL_DIR)
@@ -49,19 +75,21 @@ if __name__ == "__main__":
     DATA_DIR = os.path.join(ROOT_DIR, 'data')
     DB_PATH = os.path.join(DATA_DIR, 'olist.db')
 
-    ingestor = Ingestor(DB_PATH, 'tb_fodase', 'dtReference')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--table", type=str)
+    parser.add_argument("--dt_start", type=str)
+    parser.add_argument("--dt_stop", type=str)
+    parser.add_argument("--dt_period", type=str)
+    args = parser.parse_args()
 
-    print("Importando Query...")
-    query_path = os.path.join(ETL_DIR, 'clientes.sql')
-    query = ingestor.import_query(query_path).format(date='2018-01-01')
+    dates = date_range(args.dt_start, args.dt_stop, args.dt_period)
 
-    print("Executando ETL..")
-    df = ingestor.execute_etl(query)
-    
-    print("Inserindo dados na tabela...")
-    ingestor.insert_table(df)
+    ingestor = Ingestor(DB_PATH, args.table, 'dtReference')
+    query_path = os.path.join(ETL_DIR, f"{args.table}.sql")
+    query = ingestor.import_query(query_path)
 
-    print("Removendo dados da tabela...")
-    ingestor.delete_table_rows('2018-01-01')
+    for i in tqdm(dates):
+        ingestor.update_table(query, i)
 
-    print("OK.")
+if __name__ == "__main__":
+    main()

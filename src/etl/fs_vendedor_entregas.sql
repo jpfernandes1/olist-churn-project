@@ -41,6 +41,7 @@ select
        max(totalFrete) as maxFrete,
        min(totalFrete) as minFrete,
        AVG(JULIANDAY(COALESCE(order_delivered_customer_date, '{date}')) - JULIANDAY(order_approved_at)) AS qtdDiasAprovadoxEntrega,
+       avg(julianday(coalesce(order_delivered_customer_date, '{date}')) - julianday(order_purchase_timestamp)) AS qtdDiasPedidoEntrega,
        AVG(JULIANDAY(order_estimated_delivery_date) - JULIANDAY(COALESCE(order_delivered_customer_date, '{date}'))) AS qtdDiasEntregaxPromessa
 from tb_pedido
 

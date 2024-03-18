@@ -19,6 +19,7 @@ LOCAL_DEV_DIR = os.path.dirname(ML_DIR)
 ROOT_DIR = os.path.dirname(LOCAL_DEV_DIR)
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 DB_PATH = os.path.join(DATA_DIR, 'olist.db')
+MODEL_DIR = os.path.join(ROOT_DIR, 'models')
 
 engine = sqlalchemy.create_engine((f"sqlite:///{DB_PATH}"))
 
@@ -115,3 +116,11 @@ metrics_model = {"auc_train": auc_train,
                  "auc_oot": auc_oot}
 
 print(metrics_model)
+
+model_dict = {"model": model_pipeline,
+              "features": X_train.columns.tolist()}
+
+model_dict.update(metrics_model)
+
+model_results = pd.Series(model_dict)
+model_results.to_pickle(f"{MODEL_DIR}/churn_olist_lgbm.pkl")
